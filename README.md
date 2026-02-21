@@ -1,4 +1,4 @@
-# Hatim El Hassak — Click2Minimize for macOS
+# Click2Minimize for macOS
 
 ![Swift](https://img.shields.io/badge/Swift-FA7343?style=for-the-badge&logo=swift&logoColor=white)
 ![macOS](https://img.shields.io/badge/macOS-000000?style=for-the-badge&logo=apple&logoColor=white)
