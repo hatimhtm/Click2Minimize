@@ -83,4 +83,5 @@ xcodebuild -scheme "Click2Hide" -configuration Release -derivedDataPath build
   [![Portfolio](https://img.shields.io/badge/Portfolio-hatimelhassak.is--a.dev-000000?style=flat-square&logo=vercel&logoColor=white)](https://hatimelhassak.is-a.dev)
   [![LinkedIn](https://img.shields.io/badge/LinkedIn-Hatim%20El%20Hassak-0077B5?style=flat-square&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/hatim-elhassak/)
   [![Email](https://img.shields.io/badge/Email-hatimelhassak.official@gmail.com-D14836?style=flat-square&logo=gmail&logoColor=white)](mailto:hatimelhassak.official@gmail.com)
+  [![BuyMeACoffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-FFDD00?style=flat-square&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/hatimelhassak)
 </div>
