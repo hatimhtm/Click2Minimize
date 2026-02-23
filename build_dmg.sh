@@ -3,10 +3,10 @@
 # Set variables
 APP_NAME="Click2Hide"
 APP_PATH="build/Build/Products/Release/$APP_NAME.app"
-DMG_NAME="$APP_NAME.dmg"
+DMG_NAME="Click2Minimize.dmg"
 DMG_PATH="dist/$DMG_NAME"
 TEMP_DIR="temp_dmg_contents"                                     # Temporary directory for DMG contents
-CODE_SIGN_IDENTITY="Apple Development: Victor Weng (SBQKADNQZW)" # Replace with your code signing identity
+CODE_SIGN_IDENTITY="-" # Replace with your code signing identity
 
 # Create the build directory if it doesn't exist
 mkdir -p build
@@ -15,9 +15,7 @@ mkdir -p build
 xcodebuild clean -scheme "$APP_NAME" -derivedDataPath build
 
 # Build the app using xcodebuild for both arm64 and x86_64 architectures
-xcodebuild -scheme "$APP_NAME" -configuration Release -derivedDataPath build \
-  -destination 'platform=macOS,arch=arm64' \
-  -destination 'platform=macOS,arch=x86_64'
+xcodebuild -scheme "$APP_NAME" -configuration Release -derivedDataPath build
 
 # Check if the build was successful
 if [ ! -d "$APP_PATH" ]; then

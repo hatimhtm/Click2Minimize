@@ -1,12 +1,20 @@
-# Click2Minimize for macOS
+<div align="center">
+  <img src="https://img.shields.io/badge/Click2Minimize-Window%20Management-FA7343?style=for-the-badge&logo=apple&logoColor=white" alt="Click2Minimize">
+  
+  <h1>🖱️ Click2Minimize</h1>
+  <p><strong>A seamless enhancement to native macOS window management</strong></p>
+  <p>A sleek, highly-polished accessibility utility designed to refine the dock interaction experience on macOS. This application modifies standard system behavior, allowing users to minimize windows simply by clicking their application icon in the Dock—a quality-of-life improvement heavily requested by power users.</p>
+  <br>
 
-![Swift](https://img.shields.io/badge/Swift-FA7343?style=for-the-badge&logo=swift&logoColor=white)
-![macOS](https://img.shields.io/badge/macOS-000000?style=for-the-badge&logo=apple&logoColor=white)
-![Xcode](https://img.shields.io/badge/Xcode-147EFB?style=for-the-badge&logo=xcode&logoColor=white)
-
-> **"A seamless enhancement to native macOS window management."**
-> 
-> A sleek, highly-polished accessibility utility designed to refine the dock interaction experience on macOS. This application modifies standard system behavior, allowing users to minimize windows simply by clicking their application icon in the Dock—a quality-of-life improvement heavily requested by power users.
+  ![Swift](https://img.shields.io/badge/Swift-5.0-FA7343?logo=swift&logoColor=white)
+  ![macOS](https://img.shields.io/badge/macOS-13.0+-000000?logo=apple&logoColor=white)
+  ![Xcode](https://img.shields.io/badge/Xcode-15-147EFB?logo=xcode&logoColor=white)
+  ![License](https://img.shields.io/badge/License-MIT-green)
+  
+  <br>
+  
+  > 🚧 **Work In Progress**: I am actively working on making Click2Minimize better day after day. Expect frequent updates and improvements!
+</div>
 
 ---
 
@@ -15,7 +23,7 @@
 This project brings an elegant and native-feeling window management feature to macOS, focusing on zero-friction interactions.
 -   **Native Integration:** Operates entirely in the background using minimal system resources.
 -   **Accessibility Driven:** Utilizes powerful `AXUIElement` permissions to securely interact with the macOS Window Server.
--   **Cross-platform Support:** Equipped with an AppleScript fallback to handle modern Mac Catalyst and Electron applications (like WhatsApp) perfectly.
+-   **Cross-platform Support:** Equipped with an AppleScript fallback to handle modern Mac Catalyst and Electron applications perfectly.
 
 ## 🛠️ Tech Stack
 
@@ -33,6 +41,8 @@ This project brings an elegant and native-feeling window management feature to m
 -   **Universal Compatibility:** Gracefully handles stubborn cross-platform applications with robust fallback engines.
 -   **Auto-Updater Disabled:** Removed external dependencies to ensure a stable, offline, and reliable local build.
 
+---
+
 ## 📦 Installation
 
 To install Click2Minimize directly on your Mac:
@@ -41,10 +51,12 @@ To install Click2Minimize directly on your Mac:
     Grab the `.dmg` file from the [Releases page](../../releases/latest).
 
 2.  **Install the App**
-    Drag `Click2Hide.app` into your `/Applications` folder.
+    Drag the app into your `/Applications` folder.
 
 3.  **Grant Permissions**
     When launched, the app will request Accessibility Permissions. Open System Settings > Privacy & Security > Accessibility and toggle it on.
+
+---
 
 ## 💻 Build from Source
 
@@ -61,7 +73,14 @@ xcodebuild -scheme "Click2Hide" -configuration Release -derivedDataPath build
 ./build_dmg.sh
 ```
 
+---
+
 ## 🤝 Let's Connect
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/hatim-elhassak/)
-[![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:hatimelhassak.official@gmail.com)
+<div align="center">
+  <p><sub>Built with ❤️ for power users everywhere</sub></p>
+  
+  [![Portfolio](https://img.shields.io/badge/Portfolio-hatimelhassak.is--a.dev-000000?style=flat-square&logo=vercel&logoColor=white)](https://hatimelhassak.is-a.dev)
+  [![LinkedIn](https://img.shields.io/badge/LinkedIn-Hatim%20El%20Hassak-0077B5?style=flat-square&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/hatim-elhassak/)
+  [![Email](https://img.shields.io/badge/Email-hatimelhassak.official@gmail.com-D14836?style=flat-square&logo=gmail&logoColor=white)](mailto:hatimelhassak.official@gmail.com)
+</div>
