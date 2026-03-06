@@ -6,7 +6,7 @@ APP_PATH="build/Build/Products/Release/$APP_NAME.app"
 DMG_NAME="Click2Minimize.dmg"
 DMG_PATH="dist/$DMG_NAME"
 TEMP_DIR="temp_dmg_contents"                                     # Temporary directory for DMG contents
-CODE_SIGN_IDENTITY="-" # Replace with your code signing identity
+CODE_SIGN_IDENTITY="${CODE_SIGN_IDENTITY:--}" # Replace with your code signing identity if not set via environment
 
 # Create the build directory if it doesn't exist
 mkdir -p build
@@ -24,10 +24,7 @@ if [ ! -d "$APP_PATH" ]; then
 fi
 
 # Code sign the app
-codesign --deep --force --verify --verbose --sign "$CODE_SIGN_IDENTITY" "$APP_PATH"
-
-# Check if the code signing was successful
-if [ $? -ne 0 ]; then
+if ! codesign --deep --force --verify --verbose --sign "$CODE_SIGN_IDENTITY" "$APP_PATH"; then
   echo "Code signing failed. Exiting."
   exit 1
 fi
