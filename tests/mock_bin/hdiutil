@@ -1,0 +1,13 @@
+#!/bin/bash
+# Mock hdiutil
+# If FAIL_HDIUTIL is set, don't create the DMG
+if [ -n "$FAIL_HDIUTIL" ]; then
+  echo "Simulated hdiutil failure"
+  # returning non-zero status
+  false
+else
+  # hdiutil create "$DMG_PATH" ...
+  DMG_PATH="$2"
+  mkdir -p "$(dirname "$DMG_PATH")"
+  touch "$DMG_PATH"
+fi

@@ -1,0 +1,7 @@
+#!/bin/bash
+# Mock xcodebuild
+if [[ "$*" == *"clean"* ]]; then
+  rm -rf build
+else
+  mkdir -p "build/Build/Products/Release/Click2Hide.app"
+fi
