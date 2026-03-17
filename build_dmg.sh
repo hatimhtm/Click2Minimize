@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Set variables
 APP_NAME="Click2Hide"
@@ -25,12 +26,6 @@ fi
 
 # Code sign the app
 codesign --deep --force --verify --verbose --sign "$CODE_SIGN_IDENTITY" "$APP_PATH"
-
-# Check if the code signing was successful
-if [ $? -ne 0 ]; then
-  echo "Code signing failed. Exiting."
-  exit 1
-fi
 
 # Create the dist directory if it doesn't exist
 mkdir -p dist
