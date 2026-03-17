@@ -24,10 +24,7 @@ if [ ! -d "$APP_PATH" ]; then
 fi
 
 # Code sign the app
-codesign --deep --force --verify --verbose --sign "$CODE_SIGN_IDENTITY" "$APP_PATH"
-
-# Check if the code signing was successful
-if [ $? -ne 0 ]; then
+if ! codesign --deep --force --verify --verbose --sign "$CODE_SIGN_IDENTITY" "$APP_PATH"; then
   echo "Code signing failed. Exiting."
   exit 1
 fi
