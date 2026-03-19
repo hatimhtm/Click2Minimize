@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set variables
-APP_NAME="Click2Hide"
+APP_NAME="Click2Minimize"
 APP_PATH="build/Build/Products/Release/$APP_NAME.app"
 DMG_NAME="Click2Minimize.dmg"
 DMG_PATH="dist/$DMG_NAME"

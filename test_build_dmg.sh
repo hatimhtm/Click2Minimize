@@ -15,7 +15,7 @@ if [[ "\$*" == *"clean"* ]]; then
     exit 0
 fi
 # Simulate successful build by creating the expected app directory
-mkdir -p build/Build/Products/Release/Click2Hide.app
+mkdir -p build/Build/Products/Release/Click2Minimize.app
 exit 0
 MOCK
     chmod +x "$MOCK_DIR/xcodebuild"
