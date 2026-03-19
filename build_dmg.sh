@@ -15,10 +15,7 @@ mkdir -p build
 xcodebuild clean -scheme "$APP_NAME" -derivedDataPath build
 
 # Build the app using xcodebuild for both arm64 and x86_64 architectures
-xcodebuild -scheme "$APP_NAME" -configuration Release -derivedDataPath build
-
-# Check if the build was successful
-if [ ! -d "$APP_PATH" ]; then
+if ! xcodebuild -scheme "$APP_NAME" -configuration Release -derivedDataPath build; then
   echo "Build failed. Exiting."
   exit 1
 fi
