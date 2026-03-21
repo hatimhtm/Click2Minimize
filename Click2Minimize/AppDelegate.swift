@@ -16,10 +16,10 @@ struct Click2MinimizeApp: App {
             Divider()
             
             // New button to open System Preferences for Accessibility
-            Button(action: appDelegate.openAccessibilityPreferences, label: { Text("Accessibility Preferences") })
+            Button(action: { appDelegate.openPreferences(for: "Accessibility") }, label: { Text("Accessibility Preferences") })
 
             // New button to open System Preferences for Automation
-            Button(action: appDelegate.openAutomationPreferences, label: { Text("Automation Preferences") })
+            Button(action: { appDelegate.openPreferences(for: "Automation") }, label: { Text("Automation Preferences") })
             Divider()
 
             Button(action: appDelegate.quitApp, label: { Text("Quit") })
@@ -359,7 +359,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         let response = alert.runModal()
         if response == .alertFirstButtonReturn {
-            openAccessibilityPreferences()
+            openPreferences(for: "Accessibility")
             // Quit the application as it won't work without permission
             // Delay termination by 1 second
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
@@ -368,13 +368,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    func openAccessibilityPreferences() {
-        let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!
-        NSWorkspace.shared.open(url)
-    }
-
-    func openAutomationPreferences() {
-        let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation")!
+    func openPreferences(for pane: String) {
+        let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_\(pane)")!
         NSWorkspace.shared.open(url)
     }
 
