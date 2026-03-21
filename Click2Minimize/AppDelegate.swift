@@ -289,37 +289,44 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         return
                     }
                     
-                    if result.descriptorType == typeAEList {
-                        for index in 1...result.numberOfItems {
-                            if let item = result.atIndex(index) {
-                                // Each item is an array containing position, size, and app ID
-                                if let positionDescriptor = item.atIndex(1),
-                                   let sizeDescriptor = item.atIndex(2),
-                                   let appIDDescriptor = item.atIndex(3) {
-                                    
-                                    // Extract position values
-                                    let positionX = positionDescriptor.atIndex(1)?.doubleValue ?? 0
-                                    let positionY = positionDescriptor.atIndex(2)?.doubleValue ?? 0
-                                    
-                                    // Extract size values
-                                    let sizeWidth = sizeDescriptor.atIndex(1)?.doubleValue ?? 0
-                                    let sizeHeight = sizeDescriptor.atIndex(2)?.doubleValue ?? 0
-                                    
-                                    // Extract app ID (name)
-                                    let appID = appIDDescriptor.stringValue ?? "Unknown"
-                                    
-                                    let rect = NSRect(x: positionX, y: positionY, width: sizeWidth, height: sizeHeight)
-                                    let dockItem = DockItem(rect: rect, appID: appID)
-                                    dockItems.append(dockItem)
-                                }
-                            }
-                        }
-                    }
+                    let parsedItems = self.parseDockItems(from: result)
+                    dockItems.append(contentsOf: parsedItems)
                 }
                 
                 promise(.success(dockItems))
             }
         }
+    }
+
+    private func parseDockItems(from descriptor: NSAppleEventDescriptor) -> [DockItem] {
+        var items: [DockItem] = []
+
+        guard descriptor.descriptorType == typeAEList else {
+            return items
+        }
+
+        for index in 1...descriptor.numberOfItems {
+            guard let item = descriptor.atIndex(index),
+                  let positionDescriptor = item.atIndex(1),
+                  let sizeDescriptor = item.atIndex(2),
+                  let appIDDescriptor = item.atIndex(3) else { continue }
+
+            // Extract position values
+            let positionX = positionDescriptor.atIndex(1)?.doubleValue ?? 0
+            let positionY = positionDescriptor.atIndex(2)?.doubleValue ?? 0
+
+            // Extract size values
+            let sizeWidth = sizeDescriptor.atIndex(1)?.doubleValue ?? 0
+            let sizeHeight = sizeDescriptor.atIndex(2)?.doubleValue ?? 0
+
+            // Extract app ID (name)
+            let appID = appIDDescriptor.stringValue ?? "Unknown"
+
+            let rect = NSRect(x: positionX, y: positionY, width: sizeWidth, height: sizeHeight)
+            items.append(DockItem(rect: rect, appID: appID))
+        }
+
+        return items
     }
 
     func registerLoginItem() {
