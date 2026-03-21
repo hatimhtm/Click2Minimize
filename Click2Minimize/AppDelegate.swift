@@ -455,58 +455,66 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let task = URLSession.shared.downloadTask(with: url) { localURL, response, error in
             guard let localURL = localURL, error == nil else {
                 print("Error downloading DMG: \(error?.localizedDescription ?? "Unknown error")")
-                // Open the browser link for manual upgrade
                 self.openBrowserForManualUpgrade()
                 return
             }
             
-            // Mount the DMG
-            let mountTask = Process()
-            mountTask.launchPath = "/usr/bin/hdiutil"
-            mountTask.arguments = ["attach", localURL.path]
-
-            mountTask.terminationHandler = { process in
-                if process.terminationStatus == 0 {
-                    // Get the mounted volume path
-                    let mountedVolumePath = "/Volumes/Click2Minimize" // Adjust this if the volume name is different
-                    let appDestinationURL = URL(fileURLWithPath: "/Applications/Click2Minimize.app") // Change to /Applications
-
-                    do {
-                        // Copy the app to the /Applications folder
-                        let appSourceURL = URL(fileURLWithPath: "\(mountedVolumePath)/Click2Minimize.app") // Adjust if necessary
-                        if FileManager.default.fileExists(atPath: appDestinationURL.path) {
-                            try FileManager.default.removeItem(at: appDestinationURL) // Remove old version if it exists
-                        }
-                        try FileManager.default.copyItem(at: appSourceURL, to: appDestinationURL)
-                        print("Successfully installed Click2Minimize to /Applications.")
-                        
-                        // Prompt the user to relaunch the app
-                        DispatchQueue.main.async {
-                            self.promptUserToRelaunch()
-                        }
-                        
-                    } catch {
-                        print("Error copying app to /Applications: \(error.localizedDescription)")
-                        // Open the browser link for manual upgrade
-                        self.openBrowserForManualUpgrade()
-                    }
-
-                    // Unmount the DMG
-                    let unmountTask = Process()
-                    unmountTask.launchPath = "/usr/bin/hdiutil"
-                    unmountTask.arguments = ["detach", mountedVolumePath]
-                    unmountTask.launch()
-                    unmountTask.waitUntilExit()
+            self.mountDiskImage(at: localURL) { success, mountedVolumePath in
+                if success, let volumePath = mountedVolumePath {
+                    self.installApp(from: volumePath)
+                    self.unmountDiskImage(at: volumePath)
                 } else {
                     print("Failed to mount DMG.")
-                    // Open the browser link for manual upgrade
                     self.openBrowserForManualUpgrade()
                 }
             }
-            
-            mountTask.launch()
         }
         task.resume()
+    }
+
+    private func mountDiskImage(at localURL: URL, completion: @escaping (Bool, String?) -> Void) {
+        let mountTask = Process()
+        mountTask.launchPath = "/usr/bin/hdiutil"
+        mountTask.arguments = ["attach", localURL.path]
+
+        mountTask.terminationHandler = { process in
+            if process.terminationStatus == 0 {
+                let mountedVolumePath = "/Volumes/Click2Minimize"
+                completion(true, mountedVolumePath)
+            } else {
+                completion(false, nil)
+            }
+        }
+
+        mountTask.launch()
+    }
+
+    private func installApp(from mountedVolumePath: String) {
+        let appDestinationURL = URL(fileURLWithPath: "/Applications/Click2Minimize.app")
+        let appSourceURL = URL(fileURLWithPath: "\(mountedVolumePath)/Click2Minimize.app")
+
+        do {
+            if FileManager.default.fileExists(atPath: appDestinationURL.path) {
+                try FileManager.default.removeItem(at: appDestinationURL)
+            }
+            try FileManager.default.copyItem(at: appSourceURL, to: appDestinationURL)
+            print("Successfully installed Click2Minimize to /Applications.")
+
+            DispatchQueue.main.async {
+                self.promptUserToRelaunch()
+            }
+        } catch {
+            print("Error copying app to /Applications: \(error.localizedDescription)")
+            self.openBrowserForManualUpgrade()
+        }
+    }
+
+    private func unmountDiskImage(at mountedVolumePath: String) {
+        let unmountTask = Process()
+        unmountTask.launchPath = "/usr/bin/hdiutil"
+        unmountTask.arguments = ["detach", mountedVolumePath]
+        unmountTask.launch()
+        unmountTask.waitUntilExit()
     }
 
     private func openBrowserForManualUpgrade() {
