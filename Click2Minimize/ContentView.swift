@@ -14,7 +14,6 @@ struct ContentView: View {
         VStack(spacing: 2) {
             Toggle("Enable Click2Minimize", isOn: $isClickToMinimizeEnabled)
                 .padding()
-                // .toggleStyle(SwitchToggleStyle(tint: .blue)) // this breaks intel mac
                 .onChange(of: isClickToMinimizeEnabled) { newValue in
                     UserDefaults.standard.set(newValue, forKey: "ClickToMinimizeEnabled")
                     NotificationCenter.default.post(name: NSNotification.Name("ClickToHideStateChanged"), object: newValue)
