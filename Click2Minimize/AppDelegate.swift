@@ -189,8 +189,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
                 // Find the running application by name using NSWorkspace
                 let runningApps = NSWorkspace.shared.runningApplications
+                let mappedAppID = appDelegate.appDict[dockItem.appID]
                 if let app = runningApps.first(where: { $0.localizedName == dockItem.appID
-                    || $0.localizedName == appDelegate.appDict[dockItem.appID] }) {
+                    || $0.localizedName == mappedAppID }) {
                     print("App isHidden: \(app.isHidden), isActive: \(app.isActive)")
                     // Check if it's active and has unminimized windows
                     if app.isActive && !app.isHidden {
