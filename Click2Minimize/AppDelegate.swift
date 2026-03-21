@@ -41,6 +41,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var mainWindow: NSWindow?
     var cancellables = Set<AnyCancellable>()
     var dockItems: [DockItem] = [] // Global variable to hold dock item rectangles
+    private static let ignoredAppIDs: Set<String> = ["Launchpad", "Trash", "Downloads"]
     private var isClickToMinimizeEnabled: Bool = { // Set isClickToMinimizeEnabled to true if not found
         if UserDefaults.standard.object(forKey: "ClickToMinimizeEnabled") == nil {
             UserDefaults.standard.set(true, forKey: "ClickToMinimizeEnabled") // Set default value
@@ -183,7 +184,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             if dockItem.rect.contains(mouseLocation) {
                 // Log the mouse location and app name
                 print("Mouse Location: \(mouseLocation), App Name: \(dockItem.appID)")
-                if "Launchpad||Trash||Downloads".contains(dockItem.appID) {
+                if AppDelegate.ignoredAppIDs.contains(dockItem.appID) {
                     // these are not working for sure
                     return Unmanaged.passUnretained(event)
                 }
