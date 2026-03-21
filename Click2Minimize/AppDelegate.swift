@@ -474,15 +474,28 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     do {
                         // Copy the app to the /Applications folder
                         let appSourceURL = URL(fileURLWithPath: "\(mountedVolumePath)/Click2Minimize.app") // Adjust if necessary
-                        if FileManager.default.fileExists(atPath: appDestinationURL.path) {
-                            try FileManager.default.removeItem(at: appDestinationURL) // Remove old version if it exists
-                        }
-                        try FileManager.default.copyItem(at: appSourceURL, to: appDestinationURL)
-                        print("Successfully installed Click2Minimize to /Applications.")
                         
-                        // Prompt the user to relaunch the app
-                        DispatchQueue.main.async {
-                            self.promptUserToRelaunch()
+                        // Verify code signature before copying
+                        let verifyTask = Process()
+                        verifyTask.launchPath = "/usr/bin/codesign"
+                        verifyTask.arguments = ["--verify", "--deep", "--strict", appSourceURL.path]
+                        verifyTask.launch()
+                        verifyTask.waitUntilExit()
+
+                        if verifyTask.terminationStatus == 0 {
+                            if FileManager.default.fileExists(atPath: appDestinationURL.path) {
+                                try FileManager.default.removeItem(at: appDestinationURL) // Remove old version if it exists
+                            }
+                            try FileManager.default.copyItem(at: appSourceURL, to: appDestinationURL)
+                            print("Successfully installed Click2Minimize to /Applications.")
+
+                            // Prompt the user to relaunch the app
+                            DispatchQueue.main.async {
+                                self.promptUserToRelaunch()
+                            }
+                        } else {
+                            print("Code signature verification failed.")
+                            self.openBrowserForManualUpgrade()
                         }
                         
                     } catch {
