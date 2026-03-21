@@ -37,6 +37,7 @@ struct Click2MinimizeApp: App {
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate {
+    var urlSession: URLSession = .shared
     var eventTap: CFMachPort?
     var mainWindow: NSWindow?
     var cancellables = Set<AnyCancellable>()
@@ -380,7 +381,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func checkForUpdates() {
         let url = URL(string: "https://api.github.com/repos/hatimhtm/Click2Minimize/releases/latest")!
-        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+        let task = self.urlSession.dataTask(with: url) { data, response, error in
             guard let data = data, error == nil else {
                 print("Error fetching updates: \(error?.localizedDescription ?? "Unknown error")")
                 return
@@ -426,9 +427,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    private func fetchLatestDMG(releaseInfo: Release) {
+    func fetchLatestDMG(releaseInfo: Release) {
         let url = URL(string: "https://api.github.com/repos/hatimhtm/Click2Minimize/releases/latest")!
-        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+        let task = self.urlSession.dataTask(with: url) { data, response, error in
             guard let data = data, error == nil else {
                 print("Error fetching release info: \(error?.localizedDescription ?? "Unknown error")")
                 return
@@ -444,6 +445,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         break
                     }
                 }
+            } else {
+                print("Error: Failed to parse JSON or missing 'assets' array.")
             }
         }
         task.resume()
@@ -452,7 +455,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func downloadDMG(from urlString: String) {
         guard let url = URL(string: urlString) else { return }
         
-        let task = URLSession.shared.downloadTask(with: url) { localURL, response, error in
+        let task = self.urlSession.downloadTask(with: url) { localURL, response, error in
             guard let localURL = localURL, error == nil else {
                 print("Error downloading DMG: \(error?.localizedDescription ?? "Unknown error")")
                 // Open the browser link for manual upgrade
