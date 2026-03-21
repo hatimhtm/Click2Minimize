@@ -7,13 +7,35 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0962BC99C082EF83653125E4 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F6287BA1C5F7E6E1AAF7859 /* Foundation.framework */; };
 		21498BA82D00A20600EE1BF3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21498BA72D00A20600EE1BF3 /* ContentView.swift */; };
 		21B199F72CFF981D00EA628D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 21B199F62CFF981D00EA628D /* Assets.xcassets */; };
 		21B19A052CFF9D1300EA628D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21B19A042CFF9D1300EA628D /* AppDelegate.swift */; };
 		21E5E2E72D009E7E00B51E70 /* Accessibility.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21E5E2E62D009E7E00B51E70 /* Accessibility.framework */; };
+		3D8F877CF6DB29746B4FD40A /* DockItemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3502CCB658BD53C00B5DF323 /* DockItemTests.swift */; };
+		B529B13A68C1E6906EF6FFAD /* DockItemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9CC13C6387AAD369226A1BD /* DockItemTests.swift */; };
+		FCDC7BDFBB970BDDFDB92904 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F6287BA1C5F7E6E1AAF7859 /* Foundation.framework */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		0435D51EAFF1F8A3E6F88F2A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 21B199E72CFF981C00EA628D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 21B199EE2CFF981C00EA628D;
+			remoteInfo = Click2Minimize;
+		};
+		3BC710B76E2A62D17FAB1412 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 21B199E72CFF981C00EA628D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 21B199EE2CFF981C00EA628D;
+			remoteInfo = Click2Minimize;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		1F6287BA1C5F7E6E1AAF7859 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		21498BA72D00A20600EE1BF3 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		21B199EF2CFF981C00EA628D /* Click2Minimize.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Click2Minimize.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		21B199F62CFF981D00EA628D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -21,6 +43,10 @@
 		21B19A042CFF9D1300EA628D /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		21B19A082D009C6E00EA628D /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		21E5E2E62D009E7E00B51E70 /* Accessibility.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accessibility.framework; path = System/Library/Frameworks/Accessibility.framework; sourceTree = SDKROOT; };
+		3502CCB658BD53C00B5DF323 /* DockItemTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DockItemTests.swift; sourceTree = "<group>"; };
+		41C6F42ED4F0AD7EECA8B56D /* Click2MinimizeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Click2MinimizeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A9CC13C6387AAD369226A1BD /* DockItemTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DockItemTests.swift; path = Click2MinimizeTests/DockItemTests.swift; sourceTree = "<group>"; };
+		FE2EE569A5A7BE7985AC7687 /* Click2MinimizeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Click2MinimizeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -29,6 +55,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				21E5E2E72D009E7E00B51E70 /* Accessibility.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5765A62A6EAFE73F7E23C522 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0962BC99C082EF83653125E4 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -41,6 +75,7 @@
 				21B199F12CFF981C00EA628D /* Click2Minimize */,
 				21B199F02CFF981C00EA628D /* Products */,
 				21E5E2E52D009E7E00B51E70 /* Frameworks */,
+				A15A8269E11C9E9B8103DF87 /* Click2MinimizeTests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -48,6 +83,8 @@
 			isa = PBXGroup;
 			children = (
 				21B199EF2CFF981C00EA628D /* Click2Minimize.app */,
+				FE2EE569A5A7BE7985AC7687 /* Click2MinimizeTests.xctest */,
+				41C6F42ED4F0AD7EECA8B56D /* Click2MinimizeTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -68,8 +105,26 @@
 			isa = PBXGroup;
 			children = (
 				21E5E2E62D009E7E00B51E70 /* Accessibility.framework */,
+				313B94A8DB2AB990C5CEA506 /* OS X */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		313B94A8DB2AB990C5CEA506 /* OS X */ = {
+			isa = PBXGroup;
+			children = (
+				1F6287BA1C5F7E6E1AAF7859 /* Foundation.framework */,
+			);
+			name = "OS X";
+			sourceTree = "<group>";
+		};
+		A15A8269E11C9E9B8103DF87 /* Click2MinimizeTests */ = {
+			isa = PBXGroup;
+			children = (
+				3502CCB658BD53C00B5DF323 /* DockItemTests.swift */,
+				A9CC13C6387AAD369226A1BD /* DockItemTests.swift */,
+			);
+			name = Click2MinimizeTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -91,6 +146,24 @@
 			productName = Click2Minimize;
 			productReference = 21B199EF2CFF981C00EA628D /* Click2Minimize.app */;
 			productType = "com.apple.product-type.application";
+		};
+		E4F43DCB37080094F07AB6FD /* Click2MinimizeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2829D048907C27F0CE37689C /* Build configuration list for PBXNativeTarget "Click2MinimizeTests" */;
+			buildPhases = (
+				0930E36F09566A548CA0693B /* Sources */,
+				5765A62A6EAFE73F7E23C522 /* Frameworks */,
+				C72E101A0CFE05ABB8D1191A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				58D88CF1FCC9C5554593EDC3 /* PBXTargetDependency */,
+			);
+			name = Click2MinimizeTests;
+			productName = Click2MinimizeTests;
+			productReference = 41C6F42ED4F0AD7EECA8B56D /* Click2MinimizeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -121,6 +194,7 @@
 			projectRoot = "";
 			targets = (
 				21B199EE2CFF981C00EA628D /* Click2Minimize */,
+				E4F43DCB37080094F07AB6FD /* Click2MinimizeTests */,
 			);
 		};
 /* End PBXProject section */
@@ -134,9 +208,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C72E101A0CFE05ABB8D1191A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		0930E36F09566A548CA0693B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B529B13A68C1E6906EF6FFAD /* DockItemTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		21B199EB2CFF981C00EA628D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -148,7 +237,28 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		58D88CF1FCC9C5554593EDC3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Click2Minimize;
+			target = 21B199EE2CFF981C00EA628D /* Click2Minimize */;
+			targetProxy = 3BC710B76E2A62D17FAB1412 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		17E07DBAD5E109B945B80CDD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.idemfactor.Click2MinimizeTests;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Click2Minimize.app/Contents/MacOS/Click2Minimize";
+			};
+			name = Debug;
+		};
 		21B199FC2CFF981D00EA628D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -335,6 +445,30 @@
 			};
 			name = Release;
 		};
+		23EFAFB58686C001F47F99D9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		647A0D1835D30CABC4EE29E0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.idemfactor.Click2MinimizeTests;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Click2Minimize.app/Contents/MacOS/Click2Minimize";
+			};
+			name = Release;
+		};
+		6F9B6AAB4FE1E08182767405 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -352,6 +486,15 @@
 			buildConfigurations = (
 				21B199FF2CFF981D00EA628D /* Debug */,
 				21B19A002CFF981D00EA628D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2829D048907C27F0CE37689C /* Build configuration list for PBXNativeTarget "Click2MinimizeTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				647A0D1835D30CABC4EE29E0 /* Release */,
+				17E07DBAD5E109B945B80CDD /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
