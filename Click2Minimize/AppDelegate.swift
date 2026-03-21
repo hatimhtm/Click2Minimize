@@ -240,17 +240,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func isActiveAppFullscreen() -> Bool {
-        // Get the list of windows for the active application
-        let windows = NSApplication.shared.windows.filter { $0.isVisible && $0.isKeyWindow }
-        
-        // Check if any window is in fullscreen mode
-        for window in windows {
-            if window.styleMask.contains(.fullSizeContentView) {
-                return true
-            }
-        }
-        
-        return false
+        // Check if any visible, key window is in fullscreen mode
+        return NSApplication.shared.windows.contains(where: {
+            $0.isVisible && $0.isKeyWindow && $0.styleMask.contains(.fullSizeContentView)
+        })
     }
 
     // Define a struct to hold the dock item information
