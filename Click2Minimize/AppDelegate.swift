@@ -264,51 +264,52 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             DispatchQueue.global(qos: .userInitiated).async {
                 var dockItems: [DockItem] = []
                 
-                let script = """
-                tell application "System Events"
-                    set dockItemList to {}
-                    tell process "Dock"
-                        set dockItems to every UI element of list 1
-                        repeat with dockItem in dockItems
-                            set dockPosition to position of dockItem
-                            set dockSize to size of dockItem
-                            set appID to name of dockItem -- Get the application name
-                            set end of dockItemList to {dockPosition, dockSize, appID}
-                        end repeat
-                        return dockItemList
-                    end tell
-                end tell
-                """
+                let apps = NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.dock")
+                guard let dockApp = apps.first else {
+                    promise(.success(dockItems))
+                    return
+                }
                 
-                var error: NSDictionary?
-                if let appleScript = NSAppleScript(source: script) {
-                    let result = appleScript.executeAndReturnError(&error)
-                    if error != nil {
-                        print("Error executing AppleScript: \(String(describing: error))")
-                        promise(.success(nil))
-                        return
-                    }
-                    
-                    if result.descriptorType == typeAEList {
-                        for index in 1...result.numberOfItems {
-                            if let item = result.atIndex(index) {
-                                // Each item is an array containing position, size, and app ID
-                                if let positionDescriptor = item.atIndex(1),
-                                   let sizeDescriptor = item.atIndex(2),
-                                   let appIDDescriptor = item.atIndex(3) {
+                let axApp = AXUIElementCreateApplication(dockApp.processIdentifier)
+                var value: CFTypeRef?
+                let result = AXUIElementCopyAttributeValue(axApp, kAXChildrenAttribute as CFString, &value)
+
+                if result == .success, let children = value as? [AXUIElement] {
+                    for child in children {
+                        var role: CFTypeRef?
+                        if AXUIElementCopyAttributeValue(child, kAXRoleAttribute as CFString, &role) == .success,
+                           (role as? String) == "AXList" || (role as? String) == (kAXListRole as String) {
+
+                            var listChildren: CFTypeRef?
+                            if AXUIElementCopyAttributeValue(child, kAXChildrenAttribute as CFString, &listChildren) == .success,
+                               let items = listChildren as? [AXUIElement] {
+                                for item in items {
+                                    var title: CFTypeRef?
+                                    AXUIElementCopyAttributeValue(item, kAXTitleAttribute as CFString, &title)
+
+                                    var position: CFTypeRef?
+                                    var size: CFTypeRef?
+                                    AXUIElementCopyAttributeValue(item, kAXPositionAttribute as CFString, &position)
+                                    AXUIElementCopyAttributeValue(item, kAXSizeAttribute as CFString, &size)
+
+                                    var pt = CGPoint.zero
+                                    var sz = CGSize.zero
                                     
-                                    // Extract position values
-                                    let positionX = positionDescriptor.atIndex(1)?.doubleValue ?? 0
-                                    let positionY = positionDescriptor.atIndex(2)?.doubleValue ?? 0
+                                    if let posValue = position as? AXValue {
+                                        var cgPoint = CGPoint.zero
+                                        AXValueGetValue(posValue, .cgPoint, &cgPoint)
+                                        pt = cgPoint
+                                    }
                                     
-                                    // Extract size values
-                                    let sizeWidth = sizeDescriptor.atIndex(1)?.doubleValue ?? 0
-                                    let sizeHeight = sizeDescriptor.atIndex(2)?.doubleValue ?? 0
+                                    if let sizeValue = size as? AXValue {
+                                        var cgSize = CGSize.zero
+                                        AXValueGetValue(sizeValue, .cgSize, &cgSize)
+                                        sz = cgSize
+                                    }
                                     
-                                    // Extract app ID (name)
-                                    let appID = appIDDescriptor.stringValue ?? "Unknown"
+                                    let appID = (title as? String) ?? "Unknown"
                                     
-                                    let rect = NSRect(x: positionX, y: positionY, width: sizeWidth, height: sizeHeight)
+                                    let rect = NSRect(x: pt.x, y: pt.y, width: sz.width, height: sz.height)
                                     let dockItem = DockItem(rect: rect, appID: appID)
                                     dockItems.append(dockItem)
                                 }
