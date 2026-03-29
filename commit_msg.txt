@@ -1,0 +1,14 @@
+🧪 [Test Improvement] Refactor AppDelegate to test registerLoginItem
+
+🎯 What:
+The registerLoginItem method in AppDelegate previously had hardcoded calls to SMAppService, meaning error states (when registration fails) were effectively untestable without mocking the actual OS service behavior.
+
+📊 Coverage:
+A new MockLoginItemManager protocol and SystemLoginItemManager implementer were introduced. The registration login is extracted to this manager.
+A mock manager allows testing behavior when SMAppService registration throws an error. Test cases cover:
+- registerLoginItemErrorHandling: Confirms that an error is correctly caught and stored in loginItemRegistrationError.
+- testRegisterLoginItemSuccess: Confirms successful registration without error.
+- testRegisterLoginItemUnregistersIfAlreadyEnabled: Confirms previous unregister is called.
+
+✨ Result:
+Tests can now structurally verify and ensure AppDelegate's registerLoginItem has resilient error handling logic and operates exactly as intended via our unit testing targets. A python script (verify_swift_tests.py) is added to structurally enforce and check the tests inside Linux CI.
