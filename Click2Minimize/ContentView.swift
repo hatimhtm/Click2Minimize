@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct ContentView: View {
-    @Environment(\.presentationMode) var presentationMode
     @State private var isClickToMinimizeEnabled: Bool = {
         if UserDefaults.standard.object(forKey: "ClickToMinimizeEnabled") == nil {
             UserDefaults.standard.set(true, forKey: "ClickToMinimizeEnabled") // Set default value
