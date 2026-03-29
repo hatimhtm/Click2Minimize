@@ -322,13 +322,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    var lastLoginItemError: Error?
+
+    // Injectable handler for login item registration
+    lazy var loginItemRegistrationHandler: () throws -> Void = {
+        if SMAppService.mainApp.status == .enabled {
+            try SMAppService.mainApp.unregister()
+        }
+        try SMAppService.mainApp.register()
+    }
+
     func registerLoginItem() {
         do {
-            if SMAppService.mainApp.status == .enabled {
-                try SMAppService.mainApp.unregister()
-            }
-            try SMAppService.mainApp.register()
+            try loginItemRegistrationHandler()
         } catch {
+            self.lastLoginItemError = error
             print("Error setting login item: \(error.localizedDescription)")
         }
     }
