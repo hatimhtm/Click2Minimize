@@ -36,11 +36,25 @@ struct Click2MinimizeApp: App {
     }
 }
 
+
+protocol FileManagerProtocol {
+    func fileExists(atPath path: String) -> Bool
+    func removeItem(at URL: URL) throws
+    func copyItem(at srcURL: URL, to dstURL: URL) throws
+}
+
+extension FileManager: FileManagerProtocol {}
+
 class AppDelegate: NSObject, NSApplicationDelegate {
     var eventTap: CFMachPort?
     var mainWindow: NSWindow?
     var cancellables = Set<AnyCancellable>()
     var dockItems: [DockItem] = [] // Global variable to hold dock item rectangles
+
+    var fileManager: FileManagerProtocol = FileManager.default
+    var openedBrowserForManualUpgrade = false
+    var disableSystemCallsForTesting = false
+
     private var isClickToMinimizeEnabled: Bool = { // Set isClickToMinimizeEnabled to true if not found
         if UserDefaults.standard.object(forKey: "ClickToMinimizeEnabled") == nil {
             UserDefaults.standard.set(true, forKey: "ClickToMinimizeEnabled") // Set default value
@@ -467,39 +481,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
             mountTask.terminationHandler = { process in
                 if process.terminationStatus == 0 {
-                    // Get the mounted volume path
-                    let mountedVolumePath = "/Volumes/Click2Minimize" // Adjust this if the volume name is different
-                    let appDestinationURL = URL(fileURLWithPath: "/Applications/Click2Minimize.app") // Change to /Applications
-
-                    do {
-                        // Copy the app to the /Applications folder
-                        let appSourceURL = URL(fileURLWithPath: "\(mountedVolumePath)/Click2Minimize.app") // Adjust if necessary
-                        if FileManager.default.fileExists(atPath: appDestinationURL.path) {
-                            try FileManager.default.removeItem(at: appDestinationURL) // Remove old version if it exists
-                        }
-                        try FileManager.default.copyItem(at: appSourceURL, to: appDestinationURL)
-                        print("Successfully installed Click2Minimize to /Applications.")
-                        
-                        // Prompt the user to relaunch the app
-                        DispatchQueue.main.async {
-                            self.promptUserToRelaunch()
-                        }
-                        
-                    } catch {
-                        print("Error copying app to /Applications: \(error.localizedDescription)")
-                        // Open the browser link for manual upgrade
-                        self.openBrowserForManualUpgrade()
-                    }
-
-                    // Unmount the DMG
-                    let unmountTask = Process()
-                    unmountTask.launchPath = "/usr/bin/hdiutil"
-                    unmountTask.arguments = ["detach", mountedVolumePath]
-                    unmountTask.launch()
-                    unmountTask.waitUntilExit()
+                    let mountedVolumePath = "/Volumes/Click2Minimize"
+                    self.installApp(from: mountedVolumePath)
                 } else {
                     print("Failed to mount DMG.")
-                    // Open the browser link for manual upgrade
                     self.openBrowserForManualUpgrade()
                 }
             }
@@ -509,7 +494,37 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         task.resume()
     }
 
-    private func openBrowserForManualUpgrade() {
+
+    func installApp(from mountedVolumePath: String) {
+        let appDestinationURL = URL(fileURLWithPath: "/Applications/Click2Minimize.app")
+        do {
+            let appSourceURL = URL(fileURLWithPath: "\(mountedVolumePath)/Click2Minimize.app")
+            if self.fileManager.fileExists(atPath: appDestinationURL.path) {
+                try self.fileManager.removeItem(at: appDestinationURL)
+            }
+            try self.fileManager.copyItem(at: appSourceURL, to: appDestinationURL)
+            print("Successfully installed Click2Minimize to /Applications.")
+
+            DispatchQueue.main.async {
+                self.promptUserToRelaunch()
+            }
+
+        } catch {
+            print("Error copying app to /Applications: \(error.localizedDescription)")
+            self.openBrowserForManualUpgrade()
+        }
+
+        if !self.disableSystemCallsForTesting {
+            let unmountTask = Process()
+            unmountTask.launchPath = "/usr/bin/hdiutil"
+            unmountTask.arguments = ["detach", mountedVolumePath]
+            unmountTask.launch()
+            unmountTask.waitUntilExit()
+        }
+    }
+
+    func openBrowserForManualUpgrade() {
+        self.openedBrowserForManualUpgrade = true
         if let url = URL(string: "https://github.com/hatimhtm/Click2Minimize/releases") {
             NSWorkspace.shared.open(url)
         }
