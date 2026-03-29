@@ -183,7 +183,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             if dockItem.rect.contains(mouseLocation) {
                 // Log the mouse location and app name
                 print("Mouse Location: \(mouseLocation), App Name: \(dockItem.appID)")
-                if "Launchpad||Trash||Downloads".contains(dockItem.appID) {
+                if dockItem.appID == "Launchpad" || dockItem.appID == "Trash" || dockItem.appID == "Downloads" {
                     // these are not working for sure
                     return Unmanaged.passUnretained(event)
                 }
