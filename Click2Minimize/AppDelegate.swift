@@ -5,6 +5,7 @@ import ApplicationServices
 import Combine // Add Combine framework
 import ServiceManagement
 import Foundation
+import Security
 
 @main // This indicates that this is the entry point of the application
 struct Click2MinimizeApp: App {
@@ -472,8 +473,26 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     let appDestinationURL = URL(fileURLWithPath: "/Applications/Click2Minimize.app") // Change to /Applications
 
                     do {
-                        // Copy the app to the /Applications folder
                         let appSourceURL = URL(fileURLWithPath: "\(mountedVolumePath)/Click2Minimize.app") // Adjust if necessary
+
+                        // Verify app signature before copying
+                        guard self.verifyAppSignature(at: appSourceURL) else {
+                            print("Security vulnerability prevented: Downloaded update has an invalid signature.")
+
+                            // Unmount the DMG
+                            let unmountTask = Process()
+                            unmountTask.launchPath = "/usr/bin/hdiutil"
+                            unmountTask.arguments = ["detach", mountedVolumePath]
+                            unmountTask.launch()
+                            unmountTask.waitUntilExit()
+
+                            DispatchQueue.main.async {
+                                self.openBrowserForManualUpgrade()
+                            }
+                            return
+                        }
+
+                        // Copy the app to the /Applications folder
                         if FileManager.default.fileExists(atPath: appDestinationURL.path) {
                             try FileManager.default.removeItem(at: appDestinationURL) // Remove old version if it exists
                         }
@@ -532,6 +551,38 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             NSApplication.shared.terminate(nil)
         }
+    }
+
+
+    private func verifyAppSignature(at url: URL) -> Bool {
+        var staticCode: SecStaticCode?
+        let createStatus = SecStaticCodeCreateWithPath(url as CFURL, SecCSFlags(rawValue: 0), &staticCode)
+        guard createStatus == errSecSuccess, let code = staticCode else {
+            print("SecStaticCodeCreateWithPath failed: \(createStatus)")
+            return false
+        }
+
+        var currentCode: SecCode?
+        let selfStatus = SecCodeCopySelf(SecCSFlags(rawValue: 0), &currentCode)
+        guard selfStatus == errSecSuccess, let selfCode = currentCode else {
+            print("SecCodeCopySelf failed: \(selfStatus)")
+            return false
+        }
+
+        var requirement: SecRequirement?
+        let reqStatus = SecCodeCopyDesignatedRequirement(selfCode, SecCSFlags(rawValue: 0), &requirement)
+        guard reqStatus == errSecSuccess else {
+            print("SecCodeCopyDesignatedRequirement failed: \(reqStatus)")
+            return false
+        }
+
+        let checkStatus = SecStaticCodeCheckValidity(code, SecCSFlags(rawValue: 0), requirement)
+        guard checkStatus == errSecSuccess else {
+            print("SecStaticCodeCheckValidity failed: \(checkStatus)")
+            return false
+        }
+
+        return true
     }
 
     struct Release: Codable {
