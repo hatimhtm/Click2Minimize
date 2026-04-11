@@ -463,17 +463,60 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             // Mount the DMG
             let mountTask = Process()
             mountTask.launchPath = "/usr/bin/hdiutil"
-            mountTask.arguments = ["attach", localURL.path]
+            mountTask.arguments = ["attach", localURL.path, "-plist"]
+
+            let pipe = Pipe()
+            mountTask.standardOutput = pipe
+
+            var outputData = Data()
+            let outputQueue = DispatchQueue(label: "com.click2minimize.dmgOutputQueue")
+            let readGroup = DispatchGroup()
+
+            readGroup.enter()
+            let readHandle = pipe.fileHandleForReading
+            readHandle.readabilityHandler = { handle in
+                let data = handle.availableData
+                if data.isEmpty {
+                    readHandle.readabilityHandler = nil
+                    readGroup.leave()
+                } else {
+                    outputQueue.async {
+                        outputData.append(data)
+                    }
+                }
+            }
 
             mountTask.terminationHandler = { process in
+                readGroup.wait() // Wait for EOF
+
                 if process.terminationStatus == 0 {
-                    // Get the mounted volume path
-                    let mountedVolumePath = "/Volumes/Click2Minimize" // Adjust this if the volume name is different
+                    var mountedVolumePath: String? = nil
+                    var finalData = Data()
+                    outputQueue.sync {
+                        finalData = outputData
+                    }
+
+                    if let plist = try? PropertyListSerialization.propertyList(from: finalData, options: [], format: nil) as? [String: Any],
+                       let systemEntities = plist["system-entities"] as? [[String: Any]] {
+                        for entity in systemEntities {
+                            if let mountPoint = entity["mount-point"] as? String {
+                                mountedVolumePath = mountPoint
+                                break
+                            }
+                        }
+                    }
+
+                    guard let volumePath = mountedVolumePath else {
+                        print("Failed to determine mounted volume path from hdiutil output.")
+                        self.openBrowserForManualUpgrade()
+                        return
+                    }
+
                     let appDestinationURL = URL(fileURLWithPath: "/Applications/Click2Minimize.app") // Change to /Applications
 
                     do {
                         // Copy the app to the /Applications folder
-                        let appSourceURL = URL(fileURLWithPath: "\(mountedVolumePath)/Click2Minimize.app") // Adjust if necessary
+                        let appSourceURL = URL(fileURLWithPath: "\(volumePath)/Click2Minimize.app") // Adjust if necessary
                         if FileManager.default.fileExists(atPath: appDestinationURL.path) {
                             try FileManager.default.removeItem(at: appDestinationURL) // Remove old version if it exists
                         }
@@ -494,7 +537,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     // Unmount the DMG
                     let unmountTask = Process()
                     unmountTask.launchPath = "/usr/bin/hdiutil"
-                    unmountTask.arguments = ["detach", mountedVolumePath]
+                    unmountTask.arguments = ["detach", volumePath]
                     unmountTask.launch()
                     unmountTask.waitUntilExit()
                 } else {
