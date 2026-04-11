@@ -167,6 +167,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         print("Event tap created successfully")
     }
 
+    private static let excludedDockApps: Set<String> = ["Launchpad", "Trash", "Downloads"]
+
     static func eventTapCallback(proxy: CGEventTapProxy, type: CGEventType, event: CGEvent?, appDelegate: AppDelegate) -> Unmanaged<CGEvent>? {
         guard let event = event else { return nil }
         
@@ -183,7 +185,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             if dockItem.rect.contains(mouseLocation) {
                 // Log the mouse location and app name
                 print("Mouse Location: \(mouseLocation), App Name: \(dockItem.appID)")
-                if "Launchpad||Trash||Downloads".contains(dockItem.appID) {
+                if AppDelegate.excludedDockApps.contains(dockItem.appID) {
                     // these are not working for sure
                     return Unmanaged.passUnretained(event)
                 }
