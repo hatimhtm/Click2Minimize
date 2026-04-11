@@ -37,6 +37,24 @@ struct Click2MinimizeApp: App {
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate {
+    enum Constants {
+        static let getDockRectsScript = """
+        tell application "System Events"
+            set dockItemList to {}
+            tell process "Dock"
+                set dockItems to every UI element of list 1
+                repeat with dockItem in dockItems
+                    set dockPosition to position of dockItem
+                    set dockSize to size of dockItem
+                    set appID to name of dockItem -- Get the application name
+                    set end of dockItemList to {dockPosition, dockSize, appID}
+                end repeat
+                return dockItemList
+            end tell
+        end tell
+        """
+    }
+
     var eventTap: CFMachPort?
     var mainWindow: NSWindow?
     var cancellables = Set<AnyCancellable>()
@@ -264,21 +282,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             DispatchQueue.global(qos: .userInitiated).async {
                 var dockItems: [DockItem] = []
                 
-                let script = """
-                tell application "System Events"
-                    set dockItemList to {}
-                    tell process "Dock"
-                        set dockItems to every UI element of list 1
-                        repeat with dockItem in dockItems
-                            set dockPosition to position of dockItem
-                            set dockSize to size of dockItem
-                            set appID to name of dockItem -- Get the application name
-                            set end of dockItemList to {dockPosition, dockSize, appID}
-                        end repeat
-                        return dockItemList
-                    end tell
-                end tell
-                """
+                let script = Constants.getDockRectsScript
                 
                 var error: NSDictionary?
                 if let appleScript = NSAppleScript(source: script) {
