@@ -5,6 +5,7 @@ import ApplicationServices
 import Combine // Add Combine framework
 import ServiceManagement
 import Foundation
+import Security
 
 @main // This indicates that this is the entry point of the application
 struct Click2MinimizeApp: App {
@@ -474,6 +475,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     do {
                         // Copy the app to the /Applications folder
                         let appSourceURL = URL(fileURLWithPath: "\(mountedVolumePath)/Click2Minimize.app") // Adjust if necessary
+
+                        // Verify Code Signature before copying
+                        if !self.verifyAppSignature(at: appSourceURL) {
+                            throw NSError(domain: "Click2Minimize", code: 1, userInfo: [NSLocalizedDescriptionKey: "Signature validation failed. Update aborted for security reasons."])
+                        }
+
                         if FileManager.default.fileExists(atPath: appDestinationURL.path) {
                             try FileManager.default.removeItem(at: appDestinationURL) // Remove old version if it exists
                         }
@@ -507,6 +514,38 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             mountTask.launch()
         }
         task.resume()
+    }
+
+
+    private func verifyAppSignature(at url: URL) -> Bool {
+        var staticCode: SecStaticCode?
+        let statusCreate = SecStaticCodeCreateWithPath(url as CFURL, SecCSFlags(rawValue: 0), &staticCode)
+        guard statusCreate == errSecSuccess, let code = staticCode else {
+            print("Failed to create static code object for downloaded app.")
+            return false
+        }
+
+        var currentCode: SecCode?
+        let statusCurrent = SecCodeCopySelf(SecCSFlags(rawValue: 0), &currentCode)
+        guard statusCurrent == errSecSuccess, let current = currentCode else {
+            print("Failed to get current app code object.")
+            return false
+        }
+
+        var requirement: SecRequirement?
+        let statusReq = SecCodeCopyDesignatedRequirement(current, SecCSFlags(rawValue: 0), &requirement)
+        guard statusReq == errSecSuccess, let req = requirement else {
+            print("Failed to get designated requirement.")
+            return false
+        }
+
+        let checkStatus = SecStaticCodeCheckValidity(code, SecCSFlags(rawValue: kSecCSCheckAllArchitectures), req)
+        if checkStatus == errSecSuccess {
+            return true
+        } else {
+            print("Signature validation failed with OSStatus: \(checkStatus)")
+            return false
+        }
     }
 
     private func openBrowserForManualUpgrade() {

@@ -1,0 +1,5 @@
+🎯 **What:** Adds code signature validation when downloading and installing app updates.
+
+⚠️ **Risk:** Without validating the downloaded application's signature, a man-in-the-middle attacker (or a compromised update server/CDN) could substitute a malicious DMG. Since the code replaces the current app in `/Applications`, the user would unwittingly run malware with the same permissions as the app.
+
+🛡️ **Solution:** Implements a `verifyAppSignature(at:)` method in `AppDelegate.swift` using the `Security` framework. It checks the downloaded `SecStaticCode` against the designated requirement of the currently running application (`SecCodeCopyDesignatedRequirement`). This ensures that only updates signed by the legitimate developer team can replace the running app. The update process is aborted if validation fails.
