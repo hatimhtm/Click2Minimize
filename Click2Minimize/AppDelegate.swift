@@ -452,11 +452,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func downloadDMG(from urlString: String) {
         guard let url = URL(string: urlString) else { return }
         
+        let handleFailure: (String) -> Void = { [weak self] errorMessage in
+            print(errorMessage)
+            self?.openBrowserForManualUpgrade()
+        }
+
         let task = URLSession.shared.downloadTask(with: url) { localURL, response, error in
             guard let localURL = localURL, error == nil else {
-                print("Error downloading DMG: \(error?.localizedDescription ?? "Unknown error")")
-                // Open the browser link for manual upgrade
-                self.openBrowserForManualUpgrade()
+                handleFailure("Error downloading DMG: \(error?.localizedDescription ?? "Unknown error")")
                 return
             }
             
@@ -486,9 +489,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         }
                         
                     } catch {
-                        print("Error copying app to /Applications: \(error.localizedDescription)")
-                        // Open the browser link for manual upgrade
-                        self.openBrowserForManualUpgrade()
+                        handleFailure("Error copying app to /Applications: \(error.localizedDescription)")
                     }
 
                     // Unmount the DMG
@@ -498,9 +499,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     unmountTask.launch()
                     unmountTask.waitUntilExit()
                 } else {
-                    print("Failed to mount DMG.")
-                    // Open the browser link for manual upgrade
-                    self.openBrowserForManualUpgrade()
+                    handleFailure("Failed to mount DMG.")
                 }
             }
             
