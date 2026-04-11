@@ -36,6 +36,14 @@ struct Click2MinimizeApp: App {
     }
 }
 
+
+protocol URLSessionProtocol {
+    func dataTask(with url: URL, completionHandler: @escaping @Sendable (Data?, URLResponse?, Error?) -> Void) -> URLSessionDataTask
+    func downloadTask(with url: URL, completionHandler: @escaping @Sendable (URL?, URLResponse?, Error?) -> Void) -> URLSessionDownloadTask
+}
+
+extension URLSession: URLSessionProtocol {}
+
 class AppDelegate: NSObject, NSApplicationDelegate {
     var eventTap: CFMachPort?
     var mainWindow: NSWindow?
@@ -50,6 +58,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }() 
     var appDict: [String: String] = [:]
     var currentVersion: String = "" // Add this line to define currentVersion
+    var urlSession: URLSessionProtocol = URLSession.shared
+    var lastError: Error? // For testing observable side-effects
     private var debounceTimer: Timer?
      
     @objc func quitApp() {
@@ -380,7 +390,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func checkForUpdates() {
         let url = URL(string: "https://api.github.com/repos/hatimhtm/Click2Minimize/releases/latest")!
-        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+        let task = urlSession.dataTask(with: url) { data, response, error in
             guard let data = data, error == nil else {
                 print("Error fetching updates: \(error?.localizedDescription ?? "Unknown error")")
                 return
@@ -397,7 +407,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         task.resume()
     }
 
-    private func isNewerVersion(_ newVersion: String, currentVersion: String) -> Bool {
+    internal func isNewerVersion(_ newVersion: String, currentVersion: String) -> Bool {
         let newVersionComponents = newVersion.split(separator: ".").map { Int($0) ?? 0 }
         let currentVersionComponents = currentVersion.split(separator: ".").map { Int($0) ?? 0 }
 
@@ -411,7 +421,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return newVersionComponents.count > currentVersionComponents.count
     }
 
-    private func promptUserToUpdate(_ releaseInfo: Release) {
+    internal func promptUserToUpdate(_ releaseInfo: Release) {
         let alert = NSAlert()
         alert.messageText = "Update Available"
         alert.informativeText = "A new version \(releaseInfo.tag_name) is available. Would you like to update?"
@@ -426,11 +436,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    private func fetchLatestDMG(releaseInfo: Release) {
+    internal func fetchLatestDMG(releaseInfo: Release) {
         let url = URL(string: "https://api.github.com/repos/hatimhtm/Click2Minimize/releases/latest")!
-        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+        let task = urlSession.dataTask(with: url) { data, response, error in
             guard let data = data, error == nil else {
                 print("Error fetching release info: \(error?.localizedDescription ?? "Unknown error")")
+                self.lastError = error ?? NSError(domain: "Network", code: -1, userInfo: nil)
                 return
             }
             
@@ -449,10 +460,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         task.resume()
     }
 
-    private func downloadDMG(from urlString: String) {
+    internal func downloadDMG(from urlString: String) {
         guard let url = URL(string: urlString) else { return }
         
-        let task = URLSession.shared.downloadTask(with: url) { localURL, response, error in
+        let task = urlSession.downloadTask(with: url) { localURL, response, error in
             guard let localURL = localURL, error == nil else {
                 print("Error downloading DMG: \(error?.localizedDescription ?? "Unknown error")")
                 // Open the browser link for manual upgrade
@@ -509,13 +520,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         task.resume()
     }
 
-    private func openBrowserForManualUpgrade() {
+    internal func openBrowserForManualUpgrade() {
         if let url = URL(string: "https://github.com/hatimhtm/Click2Minimize/releases") {
             NSWorkspace.shared.open(url)
         }
     }
 
-    private func promptUserToRelaunch() {
+    internal func promptUserToRelaunch() {
         let alert = NSAlert()
         alert.messageText = "Update Successful"
         alert.informativeText = "The application has been successfully updated."
