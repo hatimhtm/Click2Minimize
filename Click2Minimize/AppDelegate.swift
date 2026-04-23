@@ -261,8 +261,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func getDockRects() -> Future<[DockItem]?, Never> {
         return Future { promise in
-            DispatchQueue.global(qos: .userInitiated).async {
-                var dockItems: [DockItem] = []
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                guard let self = self else {
+                    promise(.success(nil))
+                    return
+                }
                 
                 let script = """
                 tell application "System Events"
@@ -280,47 +283,59 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 end tell
                 """
                 
-                var error: NSDictionary?
-                if let appleScript = NSAppleScript(source: script) {
-                    let result = appleScript.executeAndReturnError(&error)
-                    if error != nil {
-                        print("Error executing AppleScript: \(String(describing: error))")
-                        promise(.success(nil))
-                        return
-                    }
-                    
-                    if result.descriptorType == typeAEList {
-                        for index in 1...result.numberOfItems {
-                            if let item = result.atIndex(index) {
-                                // Each item is an array containing position, size, and app ID
-                                if let positionDescriptor = item.atIndex(1),
-                                   let sizeDescriptor = item.atIndex(2),
-                                   let appIDDescriptor = item.atIndex(3) {
-                                    
-                                    // Extract position values
-                                    let positionX = positionDescriptor.atIndex(1)?.doubleValue ?? 0
-                                    let positionY = positionDescriptor.atIndex(2)?.doubleValue ?? 0
-                                    
-                                    // Extract size values
-                                    let sizeWidth = sizeDescriptor.atIndex(1)?.doubleValue ?? 0
-                                    let sizeHeight = sizeDescriptor.atIndex(2)?.doubleValue ?? 0
-                                    
-                                    // Extract app ID (name)
-                                    let appID = appIDDescriptor.stringValue ?? "Unknown"
-                                    
-                                    let rect = NSRect(x: positionX, y: positionY, width: sizeWidth, height: sizeHeight)
-                                    let dockItem = DockItem(rect: rect, appID: appID)
-                                    dockItems.append(dockItem)
-                                }
-                            }
-                        }
-                    }
+                guard let result = self.executeAppleScript(script) else {
+                    promise(.success(nil))
+                    return
                 }
                 
+                let dockItems = self.parseDockItems(from: result)
                 promise(.success(dockItems))
             }
         }
     }
+
+
+    private func executeAppleScript(_ script: String) -> NSAppleEventDescriptor? {
+        var error: NSDictionary?
+        guard let appleScript = NSAppleScript(source: script) else { return nil }
+
+        let result = appleScript.executeAndReturnError(&error)
+        if error != nil {
+            print("Error executing AppleScript: \(String(describing: error))")
+            return nil
+        }
+        return result
+    }
+
+    private func parseDockItems(from result: NSAppleEventDescriptor) -> [DockItem] {
+        var dockItems: [DockItem] = []
+
+        guard result.descriptorType == typeAEList else { return dockItems }
+
+        for index in 1...result.numberOfItems {
+            guard let item = result.atIndex(index),
+                  let positionDescriptor = item.atIndex(1),
+                  let sizeDescriptor = item.atIndex(2),
+                  let appIDDescriptor = item.atIndex(3) else { continue }
+
+            // Extract position values
+            let positionX = positionDescriptor.atIndex(1)?.doubleValue ?? 0
+            let positionY = positionDescriptor.atIndex(2)?.doubleValue ?? 0
+
+            // Extract size values
+            let sizeWidth = sizeDescriptor.atIndex(1)?.doubleValue ?? 0
+            let sizeHeight = sizeDescriptor.atIndex(2)?.doubleValue ?? 0
+
+            // Extract app ID (name)
+            let appID = appIDDescriptor.stringValue ?? "Unknown"
+
+            let rect = NSRect(x: positionX, y: positionY, width: sizeWidth, height: sizeHeight)
+            dockItems.append(DockItem(rect: rect, appID: appID))
+        }
+
+        return dockItems
+    }
+
 
     func registerLoginItem() {
         do {
