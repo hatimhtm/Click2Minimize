@@ -209,6 +209,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     let runningAppNames = runningApps.map { $0.localizedName ?? "Unknown" }
                     print("No running application found with name: \(dockItem.appID).\nRunning apps: \(runningAppNames.joined(separator: " | "))")
                 }
+
+                // Break out of the loop since we found the dock item that contains the mouse location
+                break
             }
         }
         
