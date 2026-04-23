@@ -452,61 +452,113 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func downloadDMG(from urlString: String) {
         guard let url = URL(string: urlString) else { return }
         
-        let task = URLSession.shared.downloadTask(with: url) { localURL, response, error in
+        let task = URLSession.shared.downloadTask(with: url) { [weak self] localURL, response, error in
+            guard let self = self else { return }
             guard let localURL = localURL, error == nil else {
                 print("Error downloading DMG: \(error?.localizedDescription ?? "Unknown error")")
-                // Open the browser link for manual upgrade
                 self.openBrowserForManualUpgrade()
                 return
             }
             
-            // Mount the DMG
-            let mountTask = Process()
-            mountTask.launchPath = "/usr/bin/hdiutil"
-            mountTask.arguments = ["attach", localURL.path]
-
-            mountTask.terminationHandler = { process in
-                if process.terminationStatus == 0 {
-                    // Get the mounted volume path
-                    let mountedVolumePath = "/Volumes/Click2Minimize" // Adjust this if the volume name is different
-                    let appDestinationURL = URL(fileURLWithPath: "/Applications/Click2Minimize.app") // Change to /Applications
-
-                    do {
-                        // Copy the app to the /Applications folder
-                        let appSourceURL = URL(fileURLWithPath: "\(mountedVolumePath)/Click2Minimize.app") // Adjust if necessary
-                        if FileManager.default.fileExists(atPath: appDestinationURL.path) {
-                            try FileManager.default.removeItem(at: appDestinationURL) // Remove old version if it exists
-                        }
-                        try FileManager.default.copyItem(at: appSourceURL, to: appDestinationURL)
-                        print("Successfully installed Click2Minimize to /Applications.")
-                        
-                        // Prompt the user to relaunch the app
-                        DispatchQueue.main.async {
-                            self.promptUserToRelaunch()
-                        }
-                        
-                    } catch {
-                        print("Error copying app to /Applications: \(error.localizedDescription)")
-                        // Open the browser link for manual upgrade
-                        self.openBrowserForManualUpgrade()
-                    }
-
-                    // Unmount the DMG
-                    let unmountTask = Process()
-                    unmountTask.launchPath = "/usr/bin/hdiutil"
-                    unmountTask.arguments = ["detach", mountedVolumePath]
-                    unmountTask.launch()
-                    unmountTask.waitUntilExit()
-                } else {
-                    print("Failed to mount DMG.")
-                    // Open the browser link for manual upgrade
-                    self.openBrowserForManualUpgrade()
-                }
-            }
-            
-            mountTask.launch()
+            self.mountAndInstallDMG(at: localURL)
         }
         task.resume()
+    }
+
+    private func mountAndInstallDMG(at url: URL) {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/hdiutil")
+        process.arguments = ["attach", url.path, "-plist", "-nobrowse"]
+
+        let pipe = Pipe()
+        process.standardOutput = pipe
+
+        var outputData = Data()
+        let group = DispatchGroup()
+        group.enter()
+
+        pipe.fileHandleForReading.readabilityHandler = { fileHandle in
+            let data = fileHandle.availableData
+            if data.isEmpty {
+                pipe.fileHandleForReading.readabilityHandler = nil
+                group.leave()
+            } else {
+                outputData.append(data)
+            }
+        }
+
+        process.terminationHandler = { [weak self] process in
+            guard let self = self else { return }
+            group.wait()
+
+            if process.terminationStatus == 0 {
+                if let mountPoint = self.extractMountPoint(from: outputData) {
+                    self.installApp(from: mountPoint)
+                } else {
+                    print("Failed to find mount point in hdiutil output.")
+                    self.openBrowserForManualUpgrade()
+                }
+            } else {
+                print("Failed to mount DMG.")
+                self.openBrowserForManualUpgrade()
+            }
+        }
+
+        do {
+            try process.run()
+        } catch {
+            print("Failed to run hdiutil attach: \(error)")
+            self.openBrowserForManualUpgrade()
+        }
+    }
+
+    private func extractMountPoint(from data: Data) -> String? {
+        guard let plist = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any],
+              let systemEntities = plist["system-entities"] as? [[String: Any]] else {
+            return nil
+        }
+
+        for entity in systemEntities {
+            if let mountPoint = entity["mount-point"] as? String {
+                return mountPoint
+            }
+        }
+        return nil
+    }
+
+    private func installApp(from mountPoint: String) {
+        let appDestinationURL = URL(fileURLWithPath: "/Applications/Click2Minimize.app")
+        let appSourceURL = URL(fileURLWithPath: "\(mountPoint)/Click2Minimize.app")
+
+        do {
+            if FileManager.default.fileExists(atPath: appDestinationURL.path) {
+                try FileManager.default.removeItem(at: appDestinationURL)
+            }
+            try FileManager.default.copyItem(at: appSourceURL, to: appDestinationURL)
+            print("Successfully installed Click2Minimize to /Applications.")
+            
+            DispatchQueue.main.async {
+                self.promptUserToRelaunch()
+            }
+        } catch {
+            print("Error copying app to /Applications: \(error.localizedDescription)")
+            self.openBrowserForManualUpgrade()
+        }
+
+        self.unmountDMG(at: mountPoint)
+    }
+
+    private func unmountDMG(at mountPoint: String) {
+        let unmountProcess = Process()
+        unmountProcess.executableURL = URL(fileURLWithPath: "/usr/bin/hdiutil")
+        unmountProcess.arguments = ["detach", mountPoint]
+
+        do {
+            try unmountProcess.run()
+            unmountProcess.waitUntilExit()
+        } catch {
+            print("Failed to run hdiutil detach: \(error)")
+        }
     }
 
     private func openBrowserForManualUpgrade() {
