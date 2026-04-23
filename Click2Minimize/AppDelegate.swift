@@ -5,6 +5,7 @@ import ApplicationServices
 import Combine // Add Combine framework
 import ServiceManagement
 import Foundation
+import Security
 
 @main // This indicates that this is the entry point of the application
 struct Click2MinimizeApp: App {
@@ -462,18 +463,63 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             
             // Mount the DMG
             let mountTask = Process()
-            mountTask.launchPath = "/usr/bin/hdiutil"
-            mountTask.arguments = ["attach", localURL.path]
+            mountTask.executableURL = URL(fileURLWithPath: "/usr/bin/hdiutil")
+            mountTask.arguments = ["attach", localURL.path, "-plist"]
+
+            let pipe = Pipe()
+            mountTask.standardOutput = pipe
+
+            var plistData = Data()
+            let lock = NSLock()
+
+            pipe.fileHandleForReading.readabilityHandler = { fileHandle in
+                let data = fileHandle.availableData
+                if !data.isEmpty {
+                    lock.lock()
+                    plistData.append(data)
+                    lock.unlock()
+                }
+            }
 
             mountTask.terminationHandler = { process in
+                pipe.fileHandleForReading.readabilityHandler = nil
+
+
                 if process.terminationStatus == 0 {
+                    var mountedVolumePath = "/Volumes/Click2Minimize"
+                    if let plist = try? PropertyListSerialization.propertyList(from: plistData, options: [], format: nil) as? [String: Any],
+                       let systemEntities = plist["system-entities"] as? [[String: Any]] {
+                        for entity in systemEntities {
+                            if let mountPoint = entity["mount-point"] as? String {
+                                mountedVolumePath = mountPoint
+                                break
+                            }
+                        }
+                    }
+
                     // Get the mounted volume path
-                    let mountedVolumePath = "/Volumes/Click2Minimize" // Adjust this if the volume name is different
                     let appDestinationURL = URL(fileURLWithPath: "/Applications/Click2Minimize.app") // Change to /Applications
 
                     do {
                         // Copy the app to the /Applications folder
                         let appSourceURL = URL(fileURLWithPath: "\(mountedVolumePath)/Click2Minimize.app") // Adjust if necessary
+                        if !self.verifyAppSignature(at: appSourceURL) {
+                            print("Security vulnerability prevented: downloaded DMG contains an improperly signed application.")
+                            // Unmount the DMG
+                            let unmountTask = Process()
+                            unmountTask.executableURL = URL(fileURLWithPath: "/usr/bin/hdiutil")
+                            unmountTask.arguments = ["detach", mountedVolumePath]
+                            do {
+                                try unmountTask.run()
+                                unmountTask.waitUntilExit()
+                            } catch {
+                                print("Failed to unmount DMG: \(error)")
+                            }
+
+                            self.openBrowserForManualUpgrade()
+                            return
+                        }
+
                         if FileManager.default.fileExists(atPath: appDestinationURL.path) {
                             try FileManager.default.removeItem(at: appDestinationURL) // Remove old version if it exists
                         }
@@ -493,10 +539,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
                     // Unmount the DMG
                     let unmountTask = Process()
-                    unmountTask.launchPath = "/usr/bin/hdiutil"
+                    unmountTask.executableURL = URL(fileURLWithPath: "/usr/bin/hdiutil")
                     unmountTask.arguments = ["detach", mountedVolumePath]
-                    unmountTask.launch()
-                    unmountTask.waitUntilExit()
+                    do {
+                        try unmountTask.run()
+                        unmountTask.waitUntilExit()
+                    } catch {
+                        print("Failed to unmount DMG: \(error)")
+                    }
                 } else {
                     print("Failed to mount DMG.")
                     // Open the browser link for manual upgrade
@@ -504,7 +554,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
             
-            mountTask.launch()
+            do {
+                try mountTask.run()
+            } catch {
+                print("Failed to run mount task: \(error)")
+            }
         }
         task.resume()
     }
@@ -531,6 +585,39 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Delay termination by 1 second
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             NSApplication.shared.terminate(nil)
+        }
+    }
+
+
+    private func verifyAppSignature(at url: URL) -> Bool {
+        var staticCode: SecStaticCode?
+        let status = SecStaticCodeCreateWithPath(url as CFURL, [], &staticCode)
+        guard status == errSecSuccess, let code = staticCode else {
+            print("Failed to create static code for validation. Status: \(status)")
+            return false
+        }
+
+        var currentCode: SecCode?
+        guard SecCodeCopySelf([], &currentCode) == errSecSuccess, let runningCode = currentCode else {
+            print("Failed to get running app code.")
+            return false
+        }
+
+        var requirement: SecRequirement?
+        guard SecCodeCopyDesignatedRequirement(runningCode, [], &requirement) == errSecSuccess else {
+            print("Failed to get designated requirement.")
+            return false
+        }
+
+        let flags: SecCSFlags = SecCSFlags(rawValue: kSecCSCheckAllArchitectures)
+        let checkStatus = SecStaticCodeCheckValidity(code, flags, requirement)
+
+        if checkStatus == errSecSuccess {
+            print("App signature is valid and matches current requirement.")
+            return true
+        } else {
+            print("App signature validation failed. Status: \(checkStatus)")
+            return false
         }
     }
 
