@@ -397,7 +397,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         task.resume()
     }
 
-    private func isNewerVersion(_ newVersion: String, currentVersion: String) -> Bool {
+    internal func isNewerVersion(_ newVersion: String, currentVersion: String) -> Bool {
         let newVersionComponents = newVersion.split(separator: ".").map { Int($0) ?? 0 }
         let currentVersionComponents = currentVersion.split(separator: ".").map { Int($0) ?? 0 }
 
