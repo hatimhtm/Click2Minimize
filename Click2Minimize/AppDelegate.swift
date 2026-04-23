@@ -37,6 +37,7 @@ struct Click2MinimizeApp: App {
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate {
+    var appService: AppServiceProtocol = SMAppService.mainApp
     var eventTap: CFMachPort?
     var mainWindow: NSWindow?
     var cancellables = Set<AnyCancellable>()
@@ -324,10 +325,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func registerLoginItem() {
         do {
-            if SMAppService.mainApp.status == .enabled {
-                try SMAppService.mainApp.unregister()
+            if appService.status == .enabled {
+                try appService.unregister()
             }
-            try SMAppService.mainApp.register()
+            try appService.register()
         } catch {
             print("Error setting login item: \(error.localizedDescription)")
         }
