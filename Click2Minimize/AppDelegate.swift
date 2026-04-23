@@ -209,6 +209,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     let runningAppNames = runningApps.map { $0.localizedName ?? "Unknown" }
                     print("No running application found with name: \(dockItem.appID).\nRunning apps: \(runningAppNames.joined(separator: " | "))")
                 }
+                break
             }
         }
         
