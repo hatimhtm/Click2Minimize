@@ -327,7 +327,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                                     let sizeHeight = sizeDescriptor.atIndex(2)?.doubleValue ?? 0
                                     
                                     // Extract app ID (name)
-                                    let appID = appIDDescriptor.stringValue ?? "Unknown"
+                                    let rawAppID = appIDDescriptor.stringValue ?? "Unknown"
+                                    // Sanitize appID to prevent Log Injection and other control-character based attacks
+                                    let appID = rawAppID.components(separatedBy: .controlCharacters).joined()
                                     
                                     let rect = NSRect(x: positionX, y: positionY, width: sizeWidth, height: sizeHeight)
                                     let dockItem = DockItem(rect: rect, appID: appID)
