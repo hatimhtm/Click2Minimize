@@ -229,22 +229,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     static func minimizeAppWindows(for app: NSRunningApplication) -> Bool {
-        let appElement = AXUIElementCreateApplication(app.processIdentifier)
-        var windowsRef: CFTypeRef?
-        let result = AXUIElementCopyAttributeValue(appElement, kAXWindowsAttribute as CFString, &windowsRef)
-        
-        guard result == .success, let windows = windowsRef as? [AXUIElement] else {
-            return false
-        }
+        return minimizeWindows(processIdentifier: app.processIdentifier)
+    }
+
+    static func minimizeWindows(processIdentifier: pid_t, env: AXEnvironment = LiveAXEnvironment()) -> Bool {
+        guard let windows = env.getWindows(for: processIdentifier) else { return false }
         
         var minimizedAny = false
         for window in windows {
-            var minimizedRef: CFTypeRef?
-            if AXUIElementCopyAttributeValue(window, kAXMinimizedAttribute as CFString, &minimizedRef) == .success,
-               let isMinimized = minimizedRef as? Bool, isMinimized == false {
-                
-                let setStatus = AXUIElementSetAttributeValue(window, kAXMinimizedAttribute as CFString, true as CFTypeRef)
-                if setStatus == .success {
+            if let isMinimized = window.isMinimized(), isMinimized == false {
+                if window.setMinimized(true) {
                     minimizedAny = true
                 }
             }
@@ -544,5 +538,45 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     struct Release: Codable {
         let tag_name: String
+    }
+}
+
+
+protocol AXEnvironment {
+    func getWindows(for processIdentifier: pid_t) -> [AXWindowProtocol]?
+}
+
+protocol AXWindowProtocol {
+    func isMinimized() -> Bool?
+    func setMinimized(_ value: Bool) -> Bool
+}
+
+struct LiveAXEnvironment: AXEnvironment {
+    func getWindows(for processIdentifier: pid_t) -> [AXWindowProtocol]? {
+        let appElement = AXUIElementCreateApplication(processIdentifier)
+        var windowsRef: CFTypeRef?
+        let result = AXUIElementCopyAttributeValue(appElement, kAXWindowsAttribute as CFString, &windowsRef)
+
+        guard result == .success, let windows = windowsRef as? [AXUIElement] else {
+            return nil
+        }
+        return windows.map { LiveAXWindow(element: $0) }
+    }
+}
+
+struct LiveAXWindow: AXWindowProtocol {
+    let element: AXUIElement
+
+    func isMinimized() -> Bool? {
+        var minimizedRef: CFTypeRef?
+        if AXUIElementCopyAttributeValue(element, kAXMinimizedAttribute as CFString, &minimizedRef) == .success,
+           let isMinimized = minimizedRef as? Bool {
+            return isMinimized
+        }
+        return nil
+    }
+
+    func setMinimized(_ value: Bool) -> Bool {
+        return AXUIElementSetAttributeValue(element, kAXMinimizedAttribute as CFString, value as CFTypeRef) == .success
     }
 }
