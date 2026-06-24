@@ -43,6 +43,8 @@ struct Click2MinimizeApp: App {
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate {
+    var didOpenBrowserForManualUpgrade = false
+    var urlOpener: (URL) -> Void = { NSWorkspace.shared.open($0) }
     var eventTap: CFMachPort?
     var mainWindow: NSWindow?
     var cancellables = Set<AnyCancellable>()
@@ -446,14 +448,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    private func fetchLatestDMG(releaseInfo: Release) {
+    func fetchLatestDMG(releaseInfo: Release, session: URLSession = .shared) {
         let url = URL(string: "https://api.github.com/repos/hatimhtm/Click2Minimize/releases/latest")!
-        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+        let task = session.dataTask(with: url) { data, response, error in
             guard let data = data, error == nil else {
                 log.error("fetchLatestDMG: \(error?.localizedDescription ?? "unknown error", privacy: .public)")
                 return
             }
             
+            var foundDMG = false
             if let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
                let assets = json["assets"] as? [[String: Any]] {
                 for asset in assets {
@@ -461,9 +464,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                        let name = asset["name"] as? String,
                        name.hasSuffix(".dmg") {
                         self.downloadDMG(from: downloadURL)
+                        foundDMG = true
                         break
                     }
                 }
+            }
+            if !foundDMG {
+                self.openBrowserForManualUpgrade()
             }
         }
         task.resume()
@@ -518,9 +525,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         task.resume()
     }
 
-    private func openBrowserForManualUpgrade() {
+    func openBrowserForManualUpgrade() {
+        self.didOpenBrowserForManualUpgrade = true
         if let url = URL(string: "https://github.com/hatimhtm/Click2Minimize/releases") {
-            NSWorkspace.shared.open(url)
+            urlOpener(url)
         }
     }
 
