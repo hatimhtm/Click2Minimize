@@ -11,9 +11,22 @@
 		21B199F72CFF981D00EA628D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 21B199F62CFF981D00EA628D /* Assets.xcassets */; };
 		21B19A052CFF9D1300EA628D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21B19A042CFF9D1300EA628D /* AppDelegate.swift */; };
 		21E5E2E72D009E7E00B51E70 /* Accessibility.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21E5E2E62D009E7E00B51E70 /* Accessibility.framework */; };
+		A80CA7AA0EA58640C307DC57 /* AppDelegateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 927F73575CA000441E825E96 /* AppDelegateTests.swift */; };
+		E603DAE682979A4E6BBE5F6F /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 379E82E4432C3E1E92766BA3 /* Cocoa.framework */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		195E70CA88EE846C65803AEA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 21B199E72CFF981C00EA628D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 21B199EE2CFF981C00EA628D;
+			remoteInfo = Click2Minimize;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		1B64EAF13FA066CF9730C9BC /* Click2MinimizeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Click2MinimizeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		21498BA72D00A20600EE1BF3 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		21B199EF2CFF981C00EA628D /* Click2Minimize.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Click2Minimize.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		21B199F62CFF981D00EA628D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -21,9 +34,19 @@
 		21B19A042CFF9D1300EA628D /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		21B19A082D009C6E00EA628D /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		21E5E2E62D009E7E00B51E70 /* Accessibility.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accessibility.framework; path = System/Library/Frameworks/Accessibility.framework; sourceTree = SDKROOT; };
+		379E82E4432C3E1E92766BA3 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.0.sdk/System/Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
+		927F73575CA000441E825E96 /* AppDelegateTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppDelegateTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		19E83825922BC2B8EC352640 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E603DAE682979A4E6BBE5F6F /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		21B199EC2CFF981C00EA628D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -41,6 +64,7 @@
 				21B199F12CFF981C00EA628D /* Click2Minimize */,
 				21B199F02CFF981C00EA628D /* Products */,
 				21E5E2E52D009E7E00B51E70 /* Frameworks */,
+				29AB2A0017C23DB72EDC9566 /* Click2MinimizeTests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -48,6 +72,7 @@
 			isa = PBXGroup;
 			children = (
 				21B199EF2CFF981C00EA628D /* Click2Minimize.app */,
+				1B64EAF13FA066CF9730C9BC /* Click2MinimizeTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -68,8 +93,26 @@
 			isa = PBXGroup;
 			children = (
 				21E5E2E62D009E7E00B51E70 /* Accessibility.framework */,
+				B8327A2051A02F3E5B8110F3 /* OS X */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		29AB2A0017C23DB72EDC9566 /* Click2MinimizeTests */ = {
+			isa = PBXGroup;
+			children = (
+				927F73575CA000441E825E96 /* AppDelegateTests.swift */,
+			);
+			name = Click2MinimizeTests;
+			path = Click2MinimizeTests;
+			sourceTree = "<group>";
+		};
+		B8327A2051A02F3E5B8110F3 /* OS X */ = {
+			isa = PBXGroup;
+			children = (
+				379E82E4432C3E1E92766BA3 /* Cocoa.framework */,
+			);
+			name = "OS X";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -91,6 +134,24 @@
 			productName = Click2Minimize;
 			productReference = 21B199EF2CFF981C00EA628D /* Click2Minimize.app */;
 			productType = "com.apple.product-type.application";
+		};
+		45B154342D9CCFFC0BD633E3 /* Click2MinimizeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 220D356DBC00BD125AE2E5FE /* Build configuration list for PBXNativeTarget "Click2MinimizeTests" */;
+			buildPhases = (
+				E415103BADD0CA9B77030410 /* Sources */,
+				19E83825922BC2B8EC352640 /* Frameworks */,
+				759447AFA41B7C8694CA6187 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				9619860A55DE14DC3E8DF2A2 /* PBXTargetDependency */,
+			);
+			name = Click2MinimizeTests;
+			productName = Click2MinimizeTests;
+			productReference = 1B64EAF13FA066CF9730C9BC /* Click2MinimizeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -121,6 +182,7 @@
 			projectRoot = "";
 			targets = (
 				21B199EE2CFF981C00EA628D /* Click2Minimize */,
+				45B154342D9CCFFC0BD633E3 /* Click2MinimizeTests */,
 			);
 		};
 /* End PBXProject section */
@@ -131,6 +193,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				21B199F72CFF981D00EA628D /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		759447AFA41B7C8694CA6187 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -146,7 +215,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E415103BADD0CA9B77030410 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A80CA7AA0EA58640C307DC57 /* AppDelegateTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		9619860A55DE14DC3E8DF2A2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Click2Minimize;
+			target = 21B199EE2CFF981C00EA628D /* Click2Minimize */;
+			targetProxy = 195E70CA88EE846C65803AEA /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		21B199FC2CFF981D00EA628D /* Debug */ = {
@@ -335,6 +421,50 @@
 			};
 			name = Release;
 		};
+		367F6539BC9E00727FC9AD86 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_TESTABILITY = YES;
+				ENABLE_TESTING_SEARCH_PATHS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yourdomain.Click2MinimizeTests;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Click2Minimize.app/Contents/MacOS/Click2Minimize";
+			};
+			name = Debug;
+		};
+		9007CC6486891FA93C77D462 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_TESTABILITY = YES;
+				ENABLE_TESTING_SEARCH_PATHS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yourdomain.Click2MinimizeTests;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Click2Minimize.app/Contents/MacOS/Click2Minimize";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -352,6 +482,15 @@
 			buildConfigurations = (
 				21B199FF2CFF981D00EA628D /* Debug */,
 				21B19A002CFF981D00EA628D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		220D356DBC00BD125AE2E5FE /* Build configuration list for PBXNativeTarget "Click2MinimizeTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9007CC6486891FA93C77D462 /* Release */,
+				367F6539BC9E00727FC9AD86 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
