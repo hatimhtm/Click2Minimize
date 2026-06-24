@@ -289,11 +289,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 tell application "System Events"
                     set dockItemList to {}
                     tell process "Dock"
-                        set dockItems to every UI element of list 1
-                        repeat with dockItem in dockItems
-                            set dockPosition to position of dockItem
-                            set dockSize to size of dockItem
-                            set appID to name of dockItem -- Get the application name
+                        set dockPositions to position of every UI element of list 1
+                        set dockSizes to size of every UI element of list 1
+                        set appIDs to name of every UI element of list 1
+
+                        repeat with i from 1 to count of dockPositions
+                            set dockPosition to item i of dockPositions
+                            set dockSize to item i of dockSizes
+                            set appID to item i of appIDs
                             set end of dockItemList to {dockPosition, dockSize, appID}
                         end repeat
                         return dockItemList
