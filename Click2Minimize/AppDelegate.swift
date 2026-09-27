@@ -149,11 +149,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: task)
     }
 
-    private func performDockUpdate() {
-        getDockRects().sink { [weak self] dockItems in
-            self?.dockItems = dockItems ?? []
-        }.store(in: &cancellables)
-        log.debug("dock items refreshed")
+    private func performDockUpdate(retriesRemaining: Int = 3) {
+        getDockRects()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] refreshedItems in
+                guard let self else { return }
+                guard let refreshedItems, !refreshedItems.isEmpty else {
+                    self.dockItems = []
+                    if retriesRemaining > 0 {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                            self?.performDockUpdate(retriesRemaining: retriesRemaining - 1)
+                        }
+                    }
+                    return
+                }
+                self.dockItems = refreshedItems
+                log.debug("dock items refreshed: \(refreshedItems.count)")
+            }
+            .store(in: &cancellables)
     }
 
     func setupAppDict() {
@@ -291,10 +304,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     tell process "Dock"
                         set dockItems to every UI element of list 1
                         repeat with dockItem in dockItems
-                            set dockPosition to position of dockItem
-                            set dockSize to size of dockItem
-                            set appID to name of dockItem -- Get the application name
-                            set end of dockItemList to {dockPosition, dockSize, appID}
+                            -- Dock items can disappear while this list is being read.
+                            -- Keep the valid items instead of discarding the entire scan.
+                            try
+                                set dockPosition to position of dockItem
+                                set dockSize to size of dockItem
+                                set appID to name of dockItem -- Get the application name
+                                set end of dockItemList to {dockPosition, dockSize, appID}
+                            end try
                         end repeat
                         return dockItemList
                     end tell
@@ -310,7 +327,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         return
                     }
                     
-                    if result.descriptorType == typeAEList {
+                    if result.descriptorType == typeAEList && result.numberOfItems > 0 {
                         for index in 1...result.numberOfItems {
                             if let item = result.atIndex(index) {
                                 // Each item is an array containing position, size, and app ID
